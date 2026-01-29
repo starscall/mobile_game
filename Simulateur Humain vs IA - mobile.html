@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STARS CALL - Mobile</title>
+    
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' },
+            startup: { ready: () => { MathJax.startup.defaultReady(); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #050a10;
+            --card-bg: #141b26;
+            --gold: #d4af37;
+            --blue: #2980b9;
+            --green: #27ae60;
+            --red: #c0392b;
+            --border: #2c3e50;
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg-dark); 
+            color: #ecf0f1; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; /* Empêche le scroll global, on gère par zone */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        .top-bar {
+            height: 40px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            font-size: 0.8em;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .phase-indicator { display: flex; gap: 10px; }
+        .phase { opacity: 0.3; font-weight: bold; font-size: 0.8em; }
+        .phase.active { opacity: 1; color: var(--gold); }
+        .btn-reset { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 4px 8px; }
+
+        /* --- ZONE PRINCIPALE (SCROLLABLE) --- */
+        .main-view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            padding-bottom: 220px; /* Espace pour la main fixe */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* --- MONDE --- */
+        .world-zone {
+            display: flex;
+            justify-content: center;
+            height: 140px; /* Plus compact sur mobile */
+            flex-shrink: 0;
+        }
+
+        /* --- ARENE --- */
+        .battle-arena {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .side {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+        }
+        .side-title { font-size: 0.7em; font-weight: bold; text-align: center; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .play-area {
+            min-height: 80px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            padding: 4px;
+        }
+
+        .score-box {
+            text-align: center;
+            margin-top: 5px;
+        }
+        .score-val { font-size: 1.5em; font-weight: bold; line-height: 1; }
+        .score-val.crash { color: var(--red); text-decoration: line-through; }
+        .score-log { font-size: 0.6em; color: #aaa; min-height: 15px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+        /* --- MAIN DU JOUEUR (FIXE EN BAS) --- */
+        .hand-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: rgba(10, 15, 25, 0.95);
+            border-top: 2px solid var(--gold);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+        }
+
+        .controls {
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #333;
+        }
+        .btn-main {
+            background: var(--gold); color: #000; border: none;
+            padding: 6px 20px; font-weight: bold; border-radius: 20px;
+            font-size: 14px; text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        .btn-main:disabled { background: #444; color: #777; box-shadow: none; }
+        .btn-pass { background: transparent; border: 1px solid #666; color: #aaa; padding: 4px 15px; border-radius: 20px; font-size: 12px; }
+
+        .hand-scroll {
+            flex: 1;
+            display: flex;
+            overflow-x: auto;
+            align-items: center;
+            padding: 0 10px;
+            gap: 8px;
+            /* Scroll fluide sur mobile */
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        /* --- CARTE DESIGN --- */
+        .card {
+            width: 90px; height: 130px; /* Taille mobile par défaut */
+            background: var(--card-bg); border: 2px solid var(--border); border-radius: 6px;
+            display: flex; flex-direction: column; position: relative;
+            flex-shrink: 0;
+            transition: transform 0.1s;
+        }
+        .card.selected { border-color: var(--gold); transform: translateY(-10px); box-shadow: 0 0 10px var(--gold); }
+        .card.disabled { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+
+        .card.unit { border-top: 3px solid var(--blue); }
+        .card.energy { border-top: 3px solid var(--green); }
+        .card.action { border-top: 3px solid var(--red); }
+        
+        .c-img-box { width: 100%; height: 60px; overflow: hidden; background: #000; }
+        .c-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+        
+        .c-top { font-size: 9px; font-weight: bold; background: rgba(0,0,0,0.6); color: #fff; padding: 2px; text-align: center; white-space: nowrap; overflow: hidden; position: absolute; width: 100%; top:0; }
+        
+        .c-mid { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2px; }
+        .c-desc { font-size: 7px; color: #ccc; text-align: center; line-height: 1.1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        
+        .c-bot { display: flex; justify-content: space-around; font-size: 10px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 2px 0; }
+
+        /* Carte Monde Spécifique */
+        .card.world { width: 120px; height: 140px; border: 2px solid var(--gold); }
+        .card.world .c-img-box { height: 80px; }
+
+        /* Mini Carte (Plateau) */
+        .mini-c {
+            width: 35px; height: 50px; border: 1px solid #555; background: #222; border-radius: 3px;
+            position: relative; overflow: hidden;
+        }
+        .mini-c img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+
+        /* TOAST NOTIFICATION */
+        #toast {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9); border: 1px solid var(--gold); color: var(--gold);
+            padding: 15px 25px; border-radius: 10px; font-weight: bold; text-align: center;
+            z-index: 2000; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+        }
+        #toast.show { opacity: 1; }
+
+        /* Media Queries pour Tablettes/Desktop (Agrandir si l'écran est grand) */
+        @media (min-width: 768px) {
+            .card { width: 110px; height: 160px; }
+            .card.world { width: 140px; height: 180px; }
+            .hand-wrapper { height: 240px; }
+            .main-view { padding-bottom: 260px; max-width: 800px; margin: auto; }
+            .c-desc { font-size: 9px; -webkit-line-clamp: 4; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div style="font-weight:bold; color:var(--gold)">STARS CALL <span style="font-size:0.7em; color:#fff">MOBILE</span></div>
+    <div class="phase-indicator">
+        <span id="ph1" class="phase active">1</span>
+        <span id="ph2" class="phase">2</span>
+        <span id="ph3" class="phase">3</span>
+    </div>
+    <button class="btn-reset" onclick="location.reload()">↺</button>
+</div>
+
+<div class="main-view">
+    
+    <div class="world-zone" id="zone-world"></div>
+
+    <div class="battle-arena">
+        <div class="side" style="border-color: var(--blue)">
+            <div class="side-title" style="color:var(--blue)">JOUEUR</div>
+            <div id="p-play-area" class="play-area"></div>
+            <div class="score-box">
+                <div id="p-score" class="score-val">---</div>
+                <div id="p-log" class="score-log"></div>
+            </div>
+        </div>
+
+        <div class="side" style="border-color: var(--red)">
+            <div class="side-title" style="color:var(--red)">RIVAL (IA)</div>
+            <div id="ai-play-area" class="play-area"></div>
+            <div class="score-box">
+                <div id="ai-score" class="score-val">---</div>
+                <div id="ai-log" class="score-log"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="hand-wrapper">
+    <div class="controls">
+        <button id="btn-act" class="btn-main" onclick="confirmPhase()">DÉPLOYER</button>
+        <button id="btn-pass" class="btn-pass" onclick="passPhase()" style="display:none">PASSER</button>
+    </div>
+    
+    <div class="hand-scroll">
+        <div id="hand-civ" style="display:flex; gap:5px;"></div>
+        <div style="width:1px; background:#444; height:80%; margin:0 5px;"></div>
+        <div id="hand-nrj" style="display:flex; gap:5px;"></div>
+    </div>
+</div>
+
+<div id="toast">Message</div>
+
+<script>
+/* ================= LOGIQUE JS (Identique PC mais adaptée UI) ================= */
+
+// Image Loader
+function getImgPath(name, type) {
+    if(!name) return "";
+    let cleanName = name.toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[éèê]/g, 'e')
+        .replace(/[àâ]/g, 'a')
+        .replace(/\./g, '')
+        .replace(/'/g, ''); 
+    return `images/${cleanName}.jpg`;
+}
+
+// Data
+const DB = {
+    mondes: [
+        { name: "Exo-Alpha", m: 5, T: 10, type: "Facile", desc: "Monde luxuriant." },
+        { name: "Prima", m: 5, T: 10, type: "Facile", desc: "Idéal agriculture." },
+        { name: "Selenia", m: 5, T: 10, type: "Facile", desc: "Nuit éternelle." },
+        { name: "Jupiter-9", m: 30, T: 20, type: "Gazeux", desc: "Tempêtes." },
+        { name: "Titan-X", m: 30, T: 20, type: "Gazeux", desc: "Orages." },
+        { name: "Krios", m: 40, T: 100, type: "Hostile", desc: "Lave." },
+        { name: "Juggernaut", m: 40, T: 100, type: "Hostile", desc: "Glace & H3." },
+        { name: "Erebus", m: 50, T: 160, type: "Abysse", desc: "Défi extrême." }
+    ],
+    unites: [
+        { name: "Module Lab", d: 1, t: 10, role: "Unit", desc: "Rapide mais fragile." },
+        { name: "Sat. Eclaireur", d: 3, t: 50, role: "Unit", desc: "Équilibré." },
+        { name: "Croiseur Sp.", d: 6, t: 80, role: "Unit", desc: "Endurant." },
+        { name: "Station Orb.", d: 10, t: 150, role: "Unit", desc: "Résistant." }
+    ],
+    actions: [
+        { name: "Propulsion Ionique", id:"prop_ion", type:"Action", target:"self", desc: "Dist / 2" },
+        { name: "Bat. Secours", id:"bat_secours", type:"Action", target:"self", desc: "Energ + 2" },
+        { name: "Bouclier Plasma", id:"shield", type:"Action", target:"self", desc: "Temps x 2" },
+        { name: "Zero Absolu", id:"zero_abs", type:"Action", target:"self", desc: "Force T=10" },
+        { name: "Siphon Energ.", id:"siphon", type:"Action", target:"rival", desc: "Rival E -2" },
+        { name: "Anomalie Grav.", id:"anomalie", type:"Action", target:"rival", desc: "Rival M x2" },
+        { name: "Piratage", id:"hack", type:"Action", target:"special", desc: "Copie Ig" },
+        { name: "Impulsion EM", id:"emp", type:"Action", target:"meta", desc: "Stop Action" }
+    ],
+    getEnergy: function() {
+        let v = Math.floor(Math.random() * 6) + 1;
+        return { val: v, type: 'Energy', name: "Énergie " + v };
+    }
+};
+
+let STATE = {
+    phase: 1,
+    world: null,
+    player: { handCiv: [], handNrj: [], sel: { unit: null, energies: [], action: null }, played: {} },
+    ai: { handCiv: [], handNrj: [], sel: { unit: null, energies: [], action: null }, played: {} }
+};
+
+function init() {
+    STATE.world = rand(DB.mondes);
+    renderWorld(STATE.world);
+    STATE.player.handCiv = buildCivHand();
+    STATE.player.handNrj = buildNrjHand();
+    STATE.ai.handCiv = buildCivHand();
+    STATE.ai.handNrj = buildNrjHand();
+    STATE.phase = 1;
+    STATE.player.sel = { unit: null, energies: [], action: null };
+    
+    // Clean UI
+    document.getElementById('p-play-area').innerHTML = '';
+    document.getElementById('ai-play-area').innerHTML = '';
+    document.getElementById('p-score').innerText = "---";
+    document.getElementById('ai-score').innerText = "---";
+    document.getElementById('p-log').innerText = "";
+    document.getElementById('ai-log').innerText = "";
+
+    renderHand();
+    updateControls();
+}
+
+function buildCivHand() {
+    let arr = [];
+    for(let i=0; i<3; i++) arr.push({...rand(DB.unites), uid:Math.random()});
+    for(let i=0; i<3; i++) arr.push(Math.random()>0.5 ? {...rand(DB.unites), uid:Math.random()} : {...rand(DB.actions), uid:Math.random()});
+    return arr.sort((a,b) => (a.role === 'Unit' ? -1 : 1));
+}
+function buildNrjHand() {
+    let arr = [];
+    for(let i=0; i<4; i++) arr.push({...DB.getEnergy(), uid:Math.random()});
+    return arr.sort((a,b) => a.val - b.val);
+}
+
+function cardClick(type, idx) {
+    if(STATE.phase === 3) return;
+    let card = (type === 'civ') ? STATE.player.handCiv[idx] : STATE.player.handNrj[idx];
+    let sel = STATE.player.sel;
+
+    if(STATE.phase === 1) {
+        if(card.role === 'Unit') sel.unit = (sel.unit === card ? null : card);
+        else if(card.type === 'Energy') {
+            if(sel.energies.includes(card)) sel.energies = sel.energies.filter(c => c!==card);
+            else if(sel.energies.length < 2) sel.energies.push(card);
+        }
+    } else if (STATE.phase === 2) {
+        if(card.type === 'Action') sel.action = (sel.action === card ? null : card);
+    }
+    renderHand();
+    updateControls();
+}
+
+function confirmPhase() {
+    if(STATE.phase === 1) {
+        STATE.player.played.unit = STATE.player.sel.unit;
+        STATE.player.played.energies = [...STATE.player.sel.energies];
+
+        let aiUnits = STATE.ai.handCiv.filter(c => c.role === 'Unit');
+        STATE.ai.played.unit = aiUnits.length > 0 ? aiUnits[0] : DB.unites[0];
+        STATE.ai.played.energies = STATE.ai.handNrj.slice(0, Math.random()>0.5 ? 2 : 1);
+
+        STATE.phase = 2;
+        showToast("Phase 2 : TACTIQUE");
+        renderPlayed(false); 
+        calcScores(false); 
+        renderHand();
+        updateControls();
+    } else if (STATE.phase === 2) {
+        STATE.player.played.action = STATE.player.sel.action;
+        let currentP = getRawScore(STATE.player);
+        let currentAI = getRawScore(STATE.ai);
+        let aiActions = STATE.ai.handCiv.filter(c => c.type === 'Action');
+        if(aiActions.length > 0 && (currentAI <= currentP || currentAI < 10)) {
+            STATE.ai.played.action = rand(aiActions);
+        } else {
+            STATE.ai.played.action = null;
+        }
+        STATE.phase = 3;
+        resolveEnd();
+    }
+}
+
+function passPhase() {
+    STATE.player.sel.action = null;
+    confirmPhase();
+}
+
+function resolveEnd() {
+    let pAct = STATE.player.played.action;
+    let aiAct = STATE.ai.played.action;
+    
+    let msg = "";
+    if(pAct && pAct.id === 'emp') {
+        if(aiAct) { aiAct = null; msg = "EMP : Action IA annulée !"; }
+        STATE.ai.played.action = null;
+    }
+    if(aiAct && aiAct.id === 'emp') {
+        if(pAct) { pAct = null; msg = "EMP : Votre action annulée !"; }
+        STATE.player.played.action = null;
+    }
+    if(msg) showToast(msg);
+
+    renderPlayed(true);
+    calcScores(true);
+    
+    setTimeout(() => {
+        let pVal = parseInt(document.getElementById('p-score').innerText);
+        let aiVal = parseInt(document.getElementById('ai-score').innerText);
+        let win = "";
+        if(pVal < 10 && aiVal < 10) win = "DOUBLE CRASH";
+        else if(pVal < 10) win = "VOUS AVEZ CRASHÉ";
+        else if(aiVal < 10) win = "VICTOIRE (IA CRASH)";
+        else if(pVal > aiVal) win = "VICTOIRE !";
+        else if(aiVal > pVal) win = "DÉFAITE...";
+        else win = "ÉGALITÉ";
+        showToast(win);
+        document.getElementById('btn-act').style.display = 'none';
+        document.getElementById('btn-pass').style.display = 'none';
+    }, 800);
+    
+    updateControls();
+}
+
+function getRawScore(who) {
+    if(!who.played.unit) return 0;
+    let E = who.played.energies.reduce((a,b)=>a+b.val,0);
+    let d = who.played.unit.d, t = who.played.unit.t;
+    let m = STATE.world.m, T = STATE.world.T;
+    return Math.round( (E/(m*d)) / (T/t) * 1000 );
+}
+
+function calcScores(finalMode) {
+    let pRes = calculate(STATE.player, STATE.ai, finalMode);
+    let aiRes = calculate(STATE.ai, STATE.player, finalMode);
+    displayScore('p', pRes);
+    displayScore('ai', aiRes);
+}
+
+function calculate(me, rival, finalMode) {
+    if(!me.played.unit) return { val:0, txt:"-" };
+    let u = me.played.unit, E = me.played.energies.reduce((s,c)=>s+c.val,0);
+    let d = u.d, t = u.t, m = STATE.world.m, T = STATE.world.T;
+    let myAct = finalMode ? me.played.action : null;
+    let rivalAct = finalMode ? rival.played.action : null;
+    let logs = [];
+
+    if(myAct) {
+        if(myAct.id === 'prop_ion') { d /= 2; logs.push("D/2"); }
+        if(myAct.id === 'bat_secours') { E += 2; logs.push("E+2"); }
+        if(myAct.id === 'shield') { t *= 2; logs.push("t*2"); }
+        if(myAct.id === 'zero_abs') { T = 10; logs.push("T=10"); }
+    }
+    if(rivalAct) {
+        if(rivalAct.id === 'siphon') { E -= 2; logs.push("E-2"); }
+        if(rivalAct.id === 'anomalie') { m *= 2; logs.push("Mx2"); }
+    }
+    if(E < 0) E = 0; if(d < 0.1) d = 0.1;
+    let Ig = E / (m*d), Ith = T / t, score = (Ig / Ith) * 1000;
+    if(myAct && myAct.id === 'hack') {
+        let rE = rival.played.energies.reduce((s,c)=>s+c.val,0);
+        let rIg = rE / (STATE.world.m * rival.played.unit.d);
+        Ig = rIg; score = (Ig / Ith) * 1000; logs.push("Hack");
+    }
+    score = Math.round(score);
+    // Affichage simplifié pour mobile
+    let txt = `E:${E} m:${m} d:${d} | T:${T} t:${t}`;
+    if(logs.length) txt += ` [${logs.join(',')}]`;
+    return { val: score, txt: txt };
+}
+
+/* UI HELPERS */
+function displayScore(who, res) {
+    let el = document.getElementById(who+'-score');
+    el.innerText = res.val;
+    el.className = "score-val " + (res.val < 10 ? "crash" : "");
+    document.getElementById(who+'-log').innerText = res.txt;
+}
+
+function renderPlayed(showAll) {
+    let pDiv = document.getElementById('p-play-area'); pDiv.innerHTML = "";
+    if(STATE.player.played.unit) pDiv.appendChild(createMini(STATE.player.played.unit, 'var(--blue)', false));
+    STATE.player.played.energies.forEach(c => pDiv.appendChild(createMini(c, 'var(--green)', false)));
+    if(STATE.player.played.action) pDiv.appendChild(createMini(STATE.player.played.action, 'var(--red)', false));
+
+    let aiDiv = document.getElementById('ai-play-area'); aiDiv.innerHTML = "";
+    if(STATE.ai.played.unit) aiDiv.appendChild(createMini(STATE.ai.played.unit, 'var(--blue)', false));
+    STATE.ai.played.energies.forEach(c => aiDiv.appendChild(createMini(c, 'var(--green)', false)));
+    if(STATE.ai.played.action) {
+        let hidden = !showAll;
+        aiDiv.appendChild(createMini(STATE.ai.played.action, 'var(--red)', hidden));
+    }
+}
+
+function renderHand() {
+    const cDiv = document.getElementById('hand-civ');
+    const nDiv = document.getElementById('hand-nrj');
+    cDiv.innerHTML = ""; nDiv.innerHTML = "";
+
+    STATE.player.handCiv.forEach((c, i) => {
+        let el = createCard(c);
+        let sel = (STATE.player.sel.unit === c || STATE.player.sel.action === c);
+        let disabled = (STATE.phase === 1 && c.type==='Action') || (STATE.phase === 2 && c.role==='Unit');
+        if(sel) el.classList.add('selected');
+        if(disabled) el.classList.add('disabled');
+        el.onclick = () => !disabled && cardClick('civ', i);
+        cDiv.appendChild(el);
+    });
+
+    STATE.player.handNrj.forEach((c, i) => {
+        let el = createCard(c);
+        let sel = STATE.player.sel.energies.includes(c);
+        let disabled = (STATE.phase !== 1);
+        if(sel) el.classList.add('selected');
+        if(disabled) el.classList.add('disabled');
+        el.onclick = () => !disabled && cardClick('nrj', i);
+        nDiv.appendChild(el);
+    });
+    
+    // Update Phase Indicator
+    for(let i=1;i<=3;i++) document.getElementById('ph'+i).className = `phase ${STATE.phase===i?'active':''}`;
+}
+
+function updateControls() {
+    let btn = document.getElementById('btn-act');
+    let pass = document.getElementById('btn-pass');
+    if(STATE.phase === 1) {
+        let ready = STATE.player.sel.unit && STATE.player.sel.energies.length > 0;
+        btn.innerText = "DÉPLOYER";
+        btn.disabled = !ready;
+        pass.style.display = 'none';
+        btn.style.display = 'block';
+    } else if (STATE.phase === 2) {
+        btn.innerText = "ACTION";
+        btn.disabled = !STATE.player.sel.action;
+        pass.style.display = 'block';
+        btn.style.display = 'block';
+    } else {
+        btn.style.display = 'none';
+        pass.style.display = 'none';
+    }
+}
+
+function createCard(c) {
+    let div = document.createElement('div');
+    div.className = `card ${c.type==='Energy'?'energy':(c.role==='Unit'?'unit':'action')}`;
+    let imgSrc = getImgPath(c.name, c.type);
+    let stats = c.role==='Unit' ? `D:${c.d} T:${c.t}` : (c.type==='Energy'?`${c.val}`:'');
+    
+    div.innerHTML = `
+        <div class="c-top">${c.name}</div>
+        <div class="c-img-box"><img src="${imgSrc}" class="c-img" onerror="this.style.opacity=0"></div>
+        <div class="c-mid"><div class="c-desc">${c.desc||''}</div></div>
+        <div class="c-bot">${stats}</div>
+    `;
+    return div;
+}
+function createMini(c, col, hide) {
+    let d = document.createElement('div');
+    d.className = `mini-c`;
+    d.style.borderColor = col;
+    if(hide) d.style.background = `repeating-linear-gradient(45deg,#222,#222 5px,#333 5px,#333 10px)`;
+    else {
+        let imgSrc = getImgPath(c.name, c.type);
+        d.innerHTML = `<img src="${imgSrc}" onerror="this.style.opacity=0">`;
+    }
+    return d;
+}
+
+function renderWorld(w) {
+    let imgSrc = getImgPath(w.name, 'World');
+    document.getElementById('zone-world').innerHTML = `
+    <div class="card world">
+        <div class="c-top" style="background:var(--gold);color:#000">${w.name}</div>
+        <div class="c-img-box"><img src="${imgSrc}" class="c-img" onerror="this.style.opacity=0"></div>
+        <div class="c-mid"><div class="c-desc">${w.type}</div></div>
+        <div class="c-bot">M:${w.m} T:${w.T}</div>
+    </div>`;
+}
+
+function showToast(txt) {
+    let t = document.getElementById('toast');
+    t.innerText = txt;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+}
+function rand(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+
+init();
+</script>
+</body>
+</html>
