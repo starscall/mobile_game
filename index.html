@@ -183,13 +183,38 @@
 <div id="toast">Message</div>
 
 <script>
+/* ================= LOGIQUE JS (Identique PC mais adaptée UI) ================= */
+
+// Image Loader
+function getImgPath(name, type) {
+    if(!name) return "";
+    let cleanName = name.toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[éèê]/g, 'e')
+        .replace(/[àâ]/g, 'a')
+        .replace(/\./g, '')
+        .replace(/'/g, ''); 
+    return `Images/${cleanName}.jpg`;
+}
+
+/* ================= DATA (AVEC NOMS DE FICHIERS EXACTS) ================= */
 /* =================================================================
    CONFIGURATION DES DONNÉES ET DES IMAGES
    ATTENTION : Vérifiez que la propriété 'img' correspond EXACTEMENT 
    au nom de votre fichier sur GitHub (majuscules/minuscules incluses)
    ================================================================= */
+
 const DB = {
     mondes: [
+        // Remplacer "Exo-Alpha.jpg" par le VRAI nom de votre fichier sur GitHub
+        { name: "Exo-Alpha", img: "Exo-Alpha.jpg", m: 5, T: 10, type: "Facile", desc: "Monde luxuriant." },
+        { name: "Prima",     img: "Prima.jpg",     m: 5, T: 10, type: "Facile", desc: "Agriculture." },
+        { name: "Selenia",   img: "Selenia.jpg",   m: 5, T: 10, type: "Facile", desc: "Nuit éternelle." },
+        { name: "Jupiter-9", img: "Jupiter-9.jpg", m: 30, T: 20, type: "Gazeux", desc: "Tempêtes." },
+        { name: "Titan-X",   img: "Titan-X.jpg",   m: 30, T: 20, type: "Gazeux", desc: "Orages." },
+        { name: "Krios",     img: "Krios.jpg",     m: 40, T: 100, type: "Hostile", desc: "Lave." },
+        { name: "Juggernaut",img: "Juggernaut.jpg",m: 40, T: 100, type: "Hostile", desc: "Glace." },
+        { name: "Erebus",    img: "Erebus.jpg",    m: 50, T: 160, type: "Abysse", desc: "Défi." },
         { name: "Exo-Alpha",  img: "Exo-Alpha.jpg",  m: 5, T: 10, type: "Facile", desc: "Monde luxuriant." },
         { name: "Prima",      img: "Prima.jpg",      m: 5, T: 10, type: "Facile", desc: "Agriculture." },
         { name: "Selenia",    img: "Selenia.jpg",    m: 5, T: 10, type: "Facile", desc: "Nuit éternelle." },
@@ -200,6 +225,11 @@ const DB = {
         { name: "Erebus",     img: "Erebus.jpg",     m: 50, T: 160, type: "Abysse", desc: "Défi." }
     ],
     unites: [
+        // Vérifiez bien si c'est "Module Lab.jpg" ou "module-lab.jpg" sur votre GitHub !
+        { name: "Module Lab",     img: "Module Lab.jpg",       d: 1, t: 10, role: "Unit", desc: "Rapide." },
+        { name: "Sat. Eclaireur", img: "Satellite Eclaireur.jpg", d: 3, t: 50, role: "Unit", desc: "Équilibré." },
+        { name: "Croiseur Sp.",   img: "Croiseur.jpg",         d: 6, t: 80, role: "Unit", desc: "Endurant." },
+        { name: "Station Orb.",   img: "Station.jpg",          d: 10, t: 150, role: "Unit", desc: "Résistant." },
         { name: "Module Lab",     img: "Module Lab.jpg",    d: 1, t: 10, role: "Unit", desc: "Rapide." },
         { name: "Sat. Eclaireur", img: "Sat Eclaireur.jpg", d: 3, t: 50, role: "Unit", desc: "Équilibré." },
         { name: "Croiseur Sp.",   img: "Croiseur.jpg",      d: 6, t: 80, role: "Unit", desc: "Endurant." },
@@ -217,10 +247,31 @@ const DB = {
     ],
     getEnergy: function() {
         let v = Math.floor(Math.random() * 6) + 1;
+        // Ici aussi, vérifiez le nom exact de vos fichiers énergie
+        // Si vous n'avez qu'une image, mettez toujours la même.
+        return { val: v, type: 'Energy', name: "Énergie " + v, img: "Energie.jpg" }; 
         // Mettez ici le nom de votre image énergie (ex: "Energie.jpg" ou "energie-1.jpg")
         return { val: v, type: 'Energy', name: "Énergie " + v, img: "Energie.jpg" };
     }
 };
+
+/* ================= NOUVELLE FONCTION DE CHARGEMENT ================= */
+function getImgPath(nameOrCard, type) {
+    // Si l'objet carte contient déjà le nom exact de l'image (méthode manuelle)
+    if (nameOrCard.img) {
+        // Attention : Si votre dossier s'appelle "Images" avec un I majuscule, changez ici !
+        return "images/" + nameOrCard.img; 
+    }
+    
+    // Sinon, méthode automatique (pour l'affichage du monde par exemple si pas passé par l'objet)
+    if (typeof nameOrCard === 'string') {
+        // On cherche dans la DB si on trouve le monde correspondant
+        let world = DB.mondes.find(w => w.name === nameOrCard);
+        if(world && world.img) return "images/" + world.img;
+    }
+
+    return "";
+}
 
 /* --- FONCTION DE CHARGEMENT D'IMAGE MANUELLE --- */
 function getImgPath(cardObj) {
