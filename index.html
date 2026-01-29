@@ -207,43 +207,31 @@ function getImgPath(name, type) {
 const DB = {
     mondes: [
         // Remplacer "Exo-Alpha.jpg" par le VRAI nom de votre fichier sur GitHub
-        { name: "Exo-Alpha", img: "Exo-Alpha.jpg", m: 5, T: 10, type: "Facile", desc: "Monde luxuriant." },
-        { name: "Prima",     img: "Prima.jpg",     m: 5, T: 10, type: "Facile", desc: "Agriculture." },
-        { name: "Selenia",   img: "Selenia.jpg",   m: 5, T: 10, type: "Facile", desc: "Nuit éternelle." },
-        { name: "Jupiter-9", img: "Jupiter-9.jpg", m: 30, T: 20, type: "Gazeux", desc: "Tempêtes." },
-        { name: "Titan-X",   img: "Titan-X.jpg",   m: 30, T: 20, type: "Gazeux", desc: "Orages." },
-        { name: "Krios",     img: "Krios.jpg",     m: 40, T: 100, type: "Hostile", desc: "Lave." },
-        { name: "Juggernaut",img: "Juggernaut.jpg",m: 40, T: 100, type: "Hostile", desc: "Glace." },
-        { name: "Erebus",    img: "Erebus.jpg",    m: 50, T: 160, type: "Abysse", desc: "Défi." },
-        { name: "Exo-Alpha",  img: "Exo-Alpha.jpg",  m: 5, T: 10, type: "Facile", desc: "Monde luxuriant." },
-        { name: "Prima",      img: "Prima.jpg",      m: 5, T: 10, type: "Facile", desc: "Agriculture." },
-        { name: "Selenia",    img: "Selenia.jpg",    m: 5, T: 10, type: "Facile", desc: "Nuit éternelle." },
-        { name: "Jupiter-9",  img: "Jupiter-9.jpg",  m: 30, T: 20, type: "Gazeux", desc: "Tempêtes." },
-        { name: "Titan-X",    img: "Titan-X.jpg",    m: 30, T: 20, type: "Gazeux", desc: "Orages." },
-        { name: "Krios",      img: "Krios.jpg",      m: 40, T: 100, type: "Hostile", desc: "Lave." },
-        { name: "Juggernaut", img: "Juggernaut.jpg", m: 40, T: 100, type: "Hostile", desc: "Glace." },
-        { name: "Erebus",     img: "Erebus.jpg",     m: 50, T: 160, type: "Abysse", desc: "Défi." }
+        { name: "Exo-Alpha", img: "exo-alpha.jpg", m: 5, T: 10, type: "Facile", desc: "Monde luxuriant." },
+        { name: "Prima",     img: "prima.jpg",     m: 5, T: 10, type: "Facile", desc: "Agriculture." },
+        { name: "Selenia",   img: "selenia.jpg",   m: 5, T: 10, type: "Facile", desc: "Nuit éternelle." },
+        { name: "Jupiter-9", img: "jupiter-9.jpg", m: 30, T: 20, type: "Gazeux", desc: "Tempêtes." },
+        { name: "Titan-X",   img: "titan-x.jpg",   m: 30, T: 20, type: "Gazeux", desc: "Orages." },
+        { name: "Krios",     img: "krios.jpg",     m: 40, T: 100, type: "Hostile", desc: "Lave." },
+        { name: "Juggernaut",img: "juggernaut.jpg",m: 40, T: 100, type: "Hostile", desc: "Glace." },
+        { name: "Erebus",    img: "erebus.jpg",    m: 50, T: 160, type: "Abysse", desc: "Défi." },
     ],
     unites: [
         // Vérifiez bien si c'est "Module Lab.jpg" ou "module-lab.jpg" sur votre GitHub !
-        { name: "Module Lab",     img: "Module Lab.jpg",       d: 1, t: 10, role: "Unit", desc: "Rapide." },
-        { name: "Sat. Eclaireur", img: "Satellite Eclaireur.jpg", d: 3, t: 50, role: "Unit", desc: "Équilibré." },
-        { name: "Croiseur Sp.",   img: "Croiseur.jpg",         d: 6, t: 80, role: "Unit", desc: "Endurant." },
-        { name: "Station Orb.",   img: "Station.jpg",          d: 10, t: 150, role: "Unit", desc: "Résistant." },
-        { name: "Module Lab",     img: "Module Lab.jpg",    d: 1, t: 10, role: "Unit", desc: "Rapide." },
-        { name: "Sat. Eclaireur", img: "Sat Eclaireur.jpg", d: 3, t: 50, role: "Unit", desc: "Équilibré." },
-        { name: "Croiseur Sp.",   img: "Croiseur.jpg",      d: 6, t: 80, role: "Unit", desc: "Endurant." },
-        { name: "Station Orb.",   img: "Station.jpg",       d: 10, t: 150, role: "Unit", desc: "Résistant." }
+        { name: "Module Lab",     img: "module-lab.jpg",       d: 1, t: 10, role: "Unit", desc: "Rapide." },
+        { name: "Sat. Eclaireur", img: "sat-eclaireur.jpg", d: 3, t: 50, role: "Unit", desc: "Équilibré." },
+        { name: "Croiseur Sp.",   img: "croiseur-sp.jpg",         d: 6, t: 80, role: "Unit", desc: "Endurant." },
+        { name: "Station Orb.",   img: "station-orb.jpg",          d: 10, t: 150, role: "Unit", desc: "Résistant." },
     ],
     actions: [
-        { name: "Propulsion Ionique", img: "Propulsion.jpg", id:"prop_ion", type:"Action", target:"self", desc: "Dist / 2" },
-        { name: "Bat. Secours",       img: "Batterie.jpg",   id:"bat_secours", type:"Action", target:"self", desc: "Energ + 2" },
-        { name: "Bouclier Plasma",    img: "Bouclier.jpg",   id:"shield", type:"Action", target:"self", desc: "Temps x 2" },
-        { name: "Zero Absolu",        img: "Zero.jpg",       id:"zero_abs", type:"Action", target:"self", desc: "T=10" },
-        { name: "Siphon Energ.",      img: "Siphon.jpg",     id:"siphon", type:"Action", target:"rival", desc: "Rival E-2" },
-        { name: "Anomalie Grav.",     img: "Anomalie.jpg",   id:"anomalie", type:"Action", target:"rival", desc: "Rival Mx2" },
-        { name: "Piratage",           img: "Piratage.jpg",   id:"hack", type:"Action", target:"special", desc: "Copie Ig" },
-        { name: "Impulsion EM",       img: "Impulsion.jpg",  id:"emp", type:"Action", target:"meta", desc: "Stop Action" }
+        { name: "Propulsion Ionique", img: "propulsion-ionique.jpg", id:"prop_ion", type:"Action", target:"self", desc: "Dist / 2" },
+        { name: "Bat. Secours",       img: "bat-secours.jpg",   id:"bat_secours", type:"Action", target:"self", desc: "Energ + 2" },
+        { name: "Bouclier Plasma",    img: "bouclier-plasma.jpg",   id:"shield", type:"Action", target:"self", desc: "Temps x 2" },
+        { name: "Zero Absolu",        img: "zero-absolu.jpg",       id:"zero_abs", type:"Action", target:"self", desc: "T=10" },
+        { name: "Siphon Energ.",      img: "siphon-energ.jpg",     id:"siphon", type:"Action", target:"rival", desc: "Rival E-2" },
+        { name: "Anomalie Grav.",     img: "anomalie-grav.jpg",   id:"anomalie", type:"Action", target:"rival", desc: "Rival Mx2" },
+        { name: "Piratage",           img: "piratage.jpg",   id:"hack", type:"Action", target:"special", desc: "Copie Ig" },
+        { name: "Impulsion EM",       img: "impulsion-em.jpg",  id:"emp", type:"Action", target:"meta", desc: "Stop Action" }
     ],
     getEnergy: function() {
         let v = Math.floor(Math.random() * 6) + 1;
@@ -514,3 +502,4 @@ init();
 </script>
 </body>
 </html>
+
