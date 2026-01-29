@@ -277,38 +277,61 @@ function getImgPath(name, type) {
     return `Images/${cleanName}.jpg`;
 }
 
-// Data
+/* ================= DATA (AVEC NOMS DE FICHIERS EXACTS) ================= */
 const DB = {
     mondes: [
-        { name: "Exo-Alpha", m: 5, T: 10, type: "Facile", desc: "Monde luxuriant." },
-        { name: "Prima", m: 5, T: 10, type: "Facile", desc: "Idéal agriculture." },
-        { name: "Selenia", m: 5, T: 10, type: "Facile", desc: "Nuit éternelle." },
-        { name: "Jupiter-9", m: 30, T: 20, type: "Gazeux", desc: "Tempêtes." },
-        { name: "Titan-X", m: 30, T: 20, type: "Gazeux", desc: "Orages." },
-        { name: "Krios", m: 40, T: 100, type: "Hostile", desc: "Lave." },
-        { name: "Juggernaut", m: 40, T: 100, type: "Hostile", desc: "Glace & H3." },
-        { name: "Erebus", m: 50, T: 160, type: "Abysse", desc: "Défi extrême." }
+        // Remplacer "Exo-Alpha.jpg" par le VRAI nom de votre fichier sur GitHub
+        { name: "Exo-Alpha", img: "Exo-Alpha.jpg", m: 5, T: 10, type: "Facile", desc: "Monde luxuriant." },
+        { name: "Prima",     img: "Prima.jpg",     m: 5, T: 10, type: "Facile", desc: "Agriculture." },
+        { name: "Selenia",   img: "Selenia.jpg",   m: 5, T: 10, type: "Facile", desc: "Nuit éternelle." },
+        { name: "Jupiter-9", img: "Jupiter-9.jpg", m: 30, T: 20, type: "Gazeux", desc: "Tempêtes." },
+        { name: "Titan-X",   img: "Titan-X.jpg",   m: 30, T: 20, type: "Gazeux", desc: "Orages." },
+        { name: "Krios",     img: "Krios.jpg",     m: 40, T: 100, type: "Hostile", desc: "Lave." },
+        { name: "Juggernaut",img: "Juggernaut.jpg",m: 40, T: 100, type: "Hostile", desc: "Glace." },
+        { name: "Erebus",    img: "Erebus.jpg",    m: 50, T: 160, type: "Abysse", desc: "Défi." }
     ],
     unites: [
-        { name: "Module Lab", d: 1, t: 10, role: "Unit", desc: "Rapide mais fragile." },
-        { name: "Sat. Eclaireur", d: 3, t: 50, role: "Unit", desc: "Équilibré." },
-        { name: "Croiseur Sp.", d: 6, t: 80, role: "Unit", desc: "Endurant." },
-        { name: "Station Orb.", d: 10, t: 150, role: "Unit", desc: "Résistant." }
+        // Vérifiez bien si c'est "Module Lab.jpg" ou "module-lab.jpg" sur votre GitHub !
+        { name: "Module Lab",     img: "Module Lab.jpg",       d: 1, t: 10, role: "Unit", desc: "Rapide." },
+        { name: "Sat. Eclaireur", img: "Satellite Eclaireur.jpg", d: 3, t: 50, role: "Unit", desc: "Équilibré." },
+        { name: "Croiseur Sp.",   img: "Croiseur.jpg",         d: 6, t: 80, role: "Unit", desc: "Endurant." },
+        { name: "Station Orb.",   img: "Station.jpg",          d: 10, t: 150, role: "Unit", desc: "Résistant." }
     ],
     actions: [
-        { name: "Propulsion Ionique", id:"prop_ion", type:"Action", target:"self", desc: "Dist / 2" },
-        { name: "Bat. Secours", id:"bat_secours", type:"Action", target:"self", desc: "Energ + 2" },
-        { name: "Bouclier Plasma", id:"shield", type:"Action", target:"self", desc: "Temps x 2" },
-        { name: "Zero Absolu", id:"zero_abs", type:"Action", target:"self", desc: "Force T=10" },
-        { name: "Siphon Energ.", id:"siphon", type:"Action", target:"rival", desc: "Rival E -2" },
-        { name: "Anomalie Grav.", id:"anomalie", type:"Action", target:"rival", desc: "Rival M x2" },
-        { name: "Piratage", id:"hack", type:"Action", target:"special", desc: "Copie Ig" },
-        { name: "Impulsion EM", id:"emp", type:"Action", target:"meta", desc: "Stop Action" }
+        { name: "Propulsion Ionique", img: "Propulsion.jpg", id:"prop_ion", type:"Action", target:"self", desc: "Dist / 2" },
+        { name: "Bat. Secours",       img: "Batterie.jpg",   id:"bat_secours", type:"Action", target:"self", desc: "Energ + 2" },
+        { name: "Bouclier Plasma",    img: "Bouclier.jpg",   id:"shield", type:"Action", target:"self", desc: "Temps x 2" },
+        { name: "Zero Absolu",        img: "Zero.jpg",       id:"zero_abs", type:"Action", target:"self", desc: "T=10" },
+        { name: "Siphon Energ.",      img: "Siphon.jpg",     id:"siphon", type:"Action", target:"rival", desc: "Rival E-2" },
+        { name: "Anomalie Grav.",     img: "Anomalie.jpg",   id:"anomalie", type:"Action", target:"rival", desc: "Rival Mx2" },
+        { name: "Piratage",           img: "Piratage.jpg",   id:"hack", type:"Action", target:"special", desc: "Copie Ig" },
+        { name: "Impulsion EM",       img: "Impulsion.jpg",  id:"emp", type:"Action", target:"meta", desc: "Stop Action" }
     ],
     getEnergy: function() {
         let v = Math.floor(Math.random() * 6) + 1;
-        return { val: v, type: 'Energy', name: "Énergie " + v };
+        // Ici aussi, vérifiez le nom exact de vos fichiers énergie
+        // Si vous n'avez qu'une image, mettez toujours la même.
+        return { val: v, type: 'Energy', name: "Énergie " + v, img: "Energie.jpg" }; 
     }
+};
+
+/* ================= NOUVELLE FONCTION DE CHARGEMENT ================= */
+function getImgPath(nameOrCard, type) {
+    // Si l'objet carte contient déjà le nom exact de l'image (méthode manuelle)
+    if (nameOrCard.img) {
+        // Attention : Si votre dossier s'appelle "Images" avec un I majuscule, changez ici !
+        return "images/" + nameOrCard.img; 
+    }
+    
+    // Sinon, méthode automatique (pour l'affichage du monde par exemple si pas passé par l'objet)
+    if (typeof nameOrCard === 'string') {
+        // On cherche dans la DB si on trouve le monde correspondant
+        let world = DB.mondes.find(w => w.name === nameOrCard);
+        if(world && world.img) return "images/" + world.img;
+    }
+
+    return "";
+}
 };
 
 let STATE = {
@@ -609,4 +632,5 @@ init();
 </script>
 </body>
 </html>
+
 
